@@ -2,67 +2,43 @@ import SwiftUI
 
 struct InfoCardView: View {
     let condition: ThermalCondition
-    let rawStateText: String
     let lastUpdatedText: String
+    let onRefresh: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
-            StatusRowView(
-                title: "Системное значение",
-                value: rawStateText
-            )
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Мониторинг")
+                        .font(.system(size: 19, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
 
-            Divider()
-                .overlay(Color.white.opacity(0.08))
+                    Text("Автоматически обновляется при изменении состояния iOS")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.48))
+                }
 
-            StatusRowView(
-                title: "Обновлено",
-                value: lastUpdatedText
-            )
+                Spacer()
 
-            Divider()
-                .overlay(Color.white.opacity(0.08))
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Описание")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.48))
-
-                Text(condition.explanation)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.82))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .contentTransition(.opacity)
-                    .id(condition.explanation)
+                Button(action: onRefresh) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .frame(width: 42, height: 42)
+                        .background(condition.accentColor, in: Circle())
+                }
+                .accessibilityLabel("Обновить")
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+
+            StatusRowView(title: "Источник", value: "iOS thermalState")
+            StatusRowView(title: "Последнее обновление", value: lastUpdatedText)
         }
         .padding(18)
-        .background {
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(Color.white.opacity(0.055))
-                .background {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.58)
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.16),
-                                    Color.white.opacity(0.04),
-                                    condition.accentColor.opacity(0.12)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                }
+                .stroke(.white.opacity(0.10), lineWidth: 1)
         }
-        .shadow(color: Color.black.opacity(0.35), radius: 28, x: 0, y: 18)
-        .animation(.easeInOut(duration: 0.35), value: condition)
+        .shadow(color: .black.opacity(0.28), radius: 24, x: 0, y: 16)
     }
 }
