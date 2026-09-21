@@ -25,29 +25,11 @@ jobs:
 
       - name: Run unit tests
         run: |
-          set -euo pipefail
-          DESTINATION=$(python3 - <<'PY'
-import json, subprocess
-devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j']))['devices']
-preferred = ['iPhone 17 Pro', 'iPhone 16 Pro', 'iPhone 16', 'iPhone 15']
-flat = [device for runtime in devices.values() for device in runtime if device.get('isAvailable')]
-for name in preferred:
-    for device in flat:
-        if device.get('name') == name:
-            print(f"platform=iOS Simulator,id={device['udid']}")
-            raise SystemExit
-for device in flat:
-    if device.get('name', '').startswith('iPhone'):
-        print(f"platform=iOS Simulator,id={device['udid']}")
-        raise SystemExit
-raise SystemExit('No available iPhone simulator')
-PY
-)
           xcodebuild \
             -project ThermalView.xcodeproj \
             -scheme ThermalView \
             -configuration Debug \
-            -destination "$DESTINATION" \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
             CODE_SIGNING_ALLOWED=NO \
             test
 
