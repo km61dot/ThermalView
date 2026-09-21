@@ -8,16 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show Xcode versions
-        run: ls /Applications | grep Xcode
-
-      - name: Select latest Xcode
+      - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Install XcodeGen
@@ -26,11 +23,39 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Run unit tests
+        run: |
+          set -euo pipefail
+          DESTINATION=$(python3 - <<'PY'
+import json, subprocess
+devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j']))['devices']
+preferred = ['iPhone 17 Pro', 'iPhone 16 Pro', 'iPhone 16', 'iPhone 15']
+flat = [device for runtime in devices.values() for device in runtime if device.get('isAvailable')]
+for name in preferred:
+    for device in flat:
+        if device.get('name') == name:
+            print(f"platform=iOS Simulator,id={device['udid']}")
+            raise SystemExit
+for device in flat:
+    if device.get('name', '').startswith('iPhone'):
+        print(f"platform=iOS Simulator,id={device['udid']}")
+        raise SystemExit
+raise SystemExit('No available iPhone simulator')
+PY
+)
+          xcodebuild \
+            -project ThermalView.xcodeproj \
+            -scheme ThermalView \
+            -configuration Debug \
+            -destination "$DESTINATION" \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
       - name: Build unsigned app
         run: |
           xcodebuild \
-            -project ThermalState.xcodeproj \
-            -scheme ThermalState \
+            -project ThermalView.xcodeproj \
+            -scheme ThermalView \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
@@ -41,17 +66,29 @@ jobs:
 
       - name: Create unsigned IPA
         run: |
+          set -euo pipefail
           mkdir -p Payload
-          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -path "*Release-iphoneos/ThermalState.app" -type d | head -n 1)
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -path "*Release-iphoneos/ThermalView.app" -type d | head -n 1)
           if [ -z "$APP_PATH" ]; then
-            echo "ThermalState.app not found"
+            echo "ThermalView.app not found"
             exit 1
           fi
           cp -R "$APP_PATH" Payload/
-          zip -r ThermalState-unsigned.ipa Payload
+          if [ -d "Payload/ThermalView.app/_CodeSignature" ]; then
+            echo "Unexpected code signature found"
+            exit 1
+          fi
+          if find Payload/ThermalView.app -name "embedded.mobileprovision" | grep -q .; then
+            echo "Unexpected embedded mobileprovision found"
+            exit 1
+          fi
+          /usr/bin/zip -qry ThermalView-unsigned.ipa Payload
+          shasum -a 256 ThermalView-unsigned.ipa > ThermalView-unsigned.ipa.sha256
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ThermalState-unsigned-ipa
-          path: ThermalState-unsigned.ipa
+          name: ThermalView-unsigned-ipa
+          path: |
+            ThermalView-unsigned.ipa
+            ThermalView-unsigned.ipa.sha256
