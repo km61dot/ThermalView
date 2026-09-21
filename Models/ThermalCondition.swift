@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum ThermalCondition: Equatable {
+enum ThermalCondition: Equatable, CaseIterable {
     case nominal
     case fair
     case serious
@@ -24,106 +24,86 @@ enum ThermalCondition: Equatable {
 
     var displayTitle: String {
         switch self {
+        case .nominal: return "Норма"
+        case .fair: return "Тепло"
+        case .serious: return "Горячо"
+        case .critical: return "Критично"
+        case .unknown: return "Неизвестно"
+        }
+    }
+
+    var shortStatus: String {
+        switch self {
+        case .nominal: return "iPhone работает без тепловых ограничений"
+        case .fair: return "Нагрузка есть, но всё стабильно"
+        case .serious: return "iOS может снижать частоты"
+        case .critical: return "Нужна пауза и охлаждение"
+        case .unknown: return "Состояние не распознано"
+        }
+    }
+
+    var recommendation: String {
+        switch self {
         case .nominal:
-            return "НОРМА"
+            return "Можно играть, снимать видео, заряжать и пользоваться навигацией без специальных действий."
         case .fair:
-            return "ТЕПЛО"
+            return "Если телефон нагревается дальше, снизь яркость, убери чехол и не держи его на солнце."
         case .serious:
-            return "ГОРЯЧО"
+            return "Лучше остановить тяжёлые игры, съёмку 4K, навигацию и зарядку до снижения температуры."
         case .critical:
-            return "КРИТИЧНО"
+            return "Положи телефон в прохладное место, отключи нагрузку и не заряжай, пока состояние не улучшится."
         case .unknown:
-            return "НЕИЗВЕСТНО"
+            return "Обнови показатель. Если статус не меняется, проверь позже на реальном устройстве."
+        }
+    }
+
+    var technicalName: String {
+        switch self {
+        case .nominal: return "nominal"
+        case .fair: return "fair"
+        case .serious: return "serious"
+        case .critical: return "critical"
+        case .unknown: return "unknown"
         }
     }
 
     var iconName: String {
         switch self {
-        case .nominal:
-            return "checkmark.circle.fill"
-        case .fair:
-            return "thermometer.medium"
-        case .serious:
-            return "thermometer.high"
-        case .critical:
-            return "exclamationmark.triangle.fill"
-        case .unknown:
-            return "questionmark.circle.fill"
-        }
-    }
-
-    var explanation: String {
-        switch self {
-        case .nominal:
-            return "Система работает в нормальном тепловом режиме."
-        case .fair:
-            return "Устройство стало теплее, но работа должна оставаться стабильной."
-        case .serious:
-            return "Устройство горячее. iOS может снижать производительность для защиты."
-        case .critical:
-            return "Критическая тепловая нагрузка. iOS может сильно ограничивать активность."
-        case .unknown:
-            return "iOS вернула неизвестное тепловое состояние."
+        case .nominal: return "checkmark.seal.fill"
+        case .fair: return "thermometer.medium"
+        case .serious: return "flame.fill"
+        case .critical: return "exclamationmark.triangle.fill"
+        case .unknown: return "questionmark.circle.fill"
         }
     }
 
     var accentColor: Color {
         switch self {
-        case .nominal:
-            return Color(red: 0.56, green: 0.78, blue: 0.64)
-        case .fair:
-            return Color(red: 0.86, green: 0.72, blue: 0.46)
-        case .serious:
-            return Color(red: 0.88, green: 0.48, blue: 0.34)
-        case .critical:
-            return Color(red: 0.92, green: 0.30, blue: 0.30)
-        case .unknown:
-            return Color(red: 0.52, green: 0.52, blue: 0.56)
+        case .nominal: return Color(red: 0.33, green: 0.88, blue: 0.62)
+        case .fair: return Color(red: 1.00, green: 0.73, blue: 0.30)
+        case .serious: return Color(red: 1.00, green: 0.43, blue: 0.26)
+        case .critical: return Color(red: 1.00, green: 0.20, blue: 0.24)
+        case .unknown: return Color(red: 0.55, green: 0.62, blue: 0.72)
         }
     }
 
     var backgroundTint: Color {
         switch self {
-        case .nominal:
-            return Color(red: 0.12, green: 0.20, blue: 0.16)
-        case .fair:
-            return Color(red: 0.22, green: 0.18, blue: 0.10)
-        case .serious:
-            return Color(red: 0.22, green: 0.11, blue: 0.08)
-        case .critical:
-            return Color(red: 0.24, green: 0.06, blue: 0.06)
-        case .unknown:
-            return Color(red: 0.10, green: 0.10, blue: 0.12)
+        case .nominal: return Color(red: 0.03, green: 0.18, blue: 0.15)
+        case .fair: return Color(red: 0.20, green: 0.14, blue: 0.04)
+        case .serious: return Color(red: 0.22, green: 0.08, blue: 0.04)
+        case .critical: return Color(red: 0.22, green: 0.03, blue: 0.05)
+        case .unknown: return Color(red: 0.07, green: 0.09, blue: 0.13)
         }
     }
 
-    var intensity: Double {
+    var progress: CGFloat {
         switch self {
-        case .nominal:
-            return 0.22
-        case .fair:
-            return 0.36
-        case .serious:
-            return 0.52
-        case .critical:
-            return 0.68
-        case .unknown:
-            return 0.18
-        }
-    }
-
-    var scale: CGFloat {
-        switch self {
-        case .nominal:
-            return 1.0
-        case .fair:
-            return 1.015
-        case .serious:
-            return 1.03
-        case .critical:
-            return 1.045
-        case .unknown:
-            return 1.0
+        case .nominal: return 0.25
+        case .fair: return 0.50
+        case .serious: return 0.74
+        case .critical: return 0.94
+        case .unknown: return 0.12
         }
     }
 }
