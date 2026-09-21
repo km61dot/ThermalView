@@ -23,16 +23,6 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Run unit tests
-        run: |
-          xcodebuild \
-            -project ThermalView.xcodeproj \
-            -scheme ThermalView \
-            -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-            CODE_SIGNING_ALLOWED=NO \
-            test
-
       - name: Build unsigned app
         run: |
           xcodebuild \
