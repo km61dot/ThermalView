@@ -9,27 +9,23 @@ struct BackgroundView: View {
 
             RadialGradient(
                 colors: [
-                    condition.backgroundTint.opacity(condition.intensity),
-                    Color.black.opacity(0.88),
-                    Color.black
+                    condition.backgroundTint.opacity(0.95),
+                    Color(red: 0.03, green: 0.04, blue: 0.07).opacity(0.92),
+                    .black
                 ],
-                center: .center,
-                startRadius: 60,
-                endRadius: 520
+                center: .top,
+                startRadius: 40,
+                endRadius: 760
             )
             .ignoresSafeArea()
 
             LinearGradient(
-                colors: [
-                    Color.white.opacity(0.028),
-                    Color.clear,
-                    Color.black.opacity(0.42)
-                ],
+                colors: [.white.opacity(0.05), .clear, .black.opacity(0.44)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
         }
-        .animation(.easeInOut(duration: 0.45), value: condition)
+        .animation(.easeInOut(duration: 0.35), value: condition)
     }
 }
